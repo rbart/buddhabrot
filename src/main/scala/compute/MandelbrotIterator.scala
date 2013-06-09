@@ -1,14 +1,25 @@
 package compute
 
-class MandelbrotIterator(private var current: Point2D) extends Iterator[Point2D] {
+class MandelbrotIterator(val start: Point2D) extends Iterator[Point2D] {
 
-  def hasNext = true
+  var prev: Point2D = null // null for perf?
   
+  def hasNext = prev == null || (prev.x * prev.x + prev.y * prev.y < 4.0) // !hasNext if it has escaped
+
   def next: Point2D = {
-    
-    val nextX = current.x * current.x - current.y * current.y
-    val nextY = 2 * current.x * current.y
-    
-    Point2D(current.x + nextX, current.y + nextY)
+
+    if (prev == null) {
+      prev = start
+      start
+    } else {
+
+      val nextX = prev.x * prev.x - prev.y * prev.y
+      val nextY = 2 * prev.x * prev.y
+
+      val next = Point2D(start.x + nextX, start.y + nextY)
+      prev = next
+      next
+    }
   }
 }
+
