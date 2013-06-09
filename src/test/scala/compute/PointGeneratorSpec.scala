@@ -11,7 +11,7 @@ class PointGeneratorTest extends FlatSpec {
     val resolution = IntPair.of(2, 2)
     
     val generator = new PointGenerator(origin, extent, resolution)
-    val points = generator.points.toSeq
+    val points = generator.toSeq
     assert(points.size == 4)
     assert(points.contains(origin))
     assert(points.contains(Point2D(0, 1)))
@@ -26,7 +26,7 @@ class PointGeneratorTest extends FlatSpec {
     val resolution = IntPair.of(3, 3)
     
     val generator = new PointGenerator(origin, extent, resolution)
-    val points = generator.points.toSeq
+    val points = generator.toSeq
     assert(points.size == 9)
     assert(points.contains(origin))
     assert(points.contains(Point2D(0, 1)))

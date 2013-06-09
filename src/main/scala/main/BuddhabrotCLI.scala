@@ -11,26 +11,34 @@ object BuddhabrotCLI {
 
   def main(args: Array[String]): Unit = {
 
-    val sampleResolution = IntPair.of(1600, 1600)
+    val sampleResolution = IntPair.of(6400, 6400)
     val pixelResolution = IntPair.of(800, 800)
-    val maxIterations = 500
+    val maxIterations = 4096
+    val maxCycle = 512
+    
+    val genll = Point2D(-2, -2)
+    val genur = Point2D(2, 2)
+    
+    val imgll = Point2D(-1.60, -1.60)
+    val imgur = Point2D(1.60, 1.60)
 
-    val llExtent = Point2D(-2, -2)
-    val urExtent = Point2D(2, 2)
-
-    val generator = new PointGenerator(llExtent, urExtent, sampleResolution)
-    val rasterizer = new Rasterizer(llExtent, urExtent, pixelResolution)
+    val generator = new PointGenerator(genll, genur, sampleResolution)
+    val rasterizer = new Rasterizer(imgll, imgur, pixelResolution)
 
     val accumulator = new Accumulator(rasterizer)
 
-    val points = generator.points
+    new ProgressReporter(generator, 5000).start()
 
-    points.flatMap({ point =>
-      new MandelbrotIterator(point).take(maxIterations)
-      //val result = new MandelbrotIterator(point).take(maxIterations).toSeq
-      //if (result.length == maxIterations) Seq.empty[Point2D] else result // buddhabrot hack
-    }).foreach(accumulator.accumulate(_))
+    val millis = Timer.time {
+      generator.grouped(1000).flatMap { group => group.par.flatMap { startPoint =>
 
+        new CycleDetector(new MandelbrotIterator(startPoint, maxIterations), maxCycle)
+
+      }}.foreach(accumulator.accumulate(_))
+    }
+    
+    println("Rendering time: %.02f sec".format(millis.toDouble / 1000.0))
+    
     val renderer = new EqualMassRenderer(accumulator)
 
     ImageFileWriter.writeToFile("/home/rbart/buddha.bmp", renderer.mappedCounts, pixelResolution)
