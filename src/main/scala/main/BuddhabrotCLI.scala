@@ -11,30 +11,43 @@ object BuddhabrotCLI {
 
   def main(args: Array[String]): Unit = {
 
-    val sampleResolution = IntPair.of(6400, 6400)
-    val pixelResolution = IntPair.of(800, 800)
-    val maxIterations = 4096
-    val maxCycle = 512
+    // image options
     
-    val genll = Point2D(-2, -2)
-    val genur = Point2D(2, 2)
+    val imgWidth = 600
+    val aspectRatio = 4.0 / 3.0
+    val oversample = 8
+    val imgHeight = (imgWidth / aspectRatio).toInt
+    val sampleResolution = IntPair.of(imgWidth * oversample, imgHeight * oversample)
+    val pixelResolution = IntPair.of(imgWidth, imgHeight)
     
-    val imgll = Point2D(-1.60, -1.60)
-    val imgur = Point2D(1.60, 1.60)
-
-    val generator = new PointGenerator(genll, genur, sampleResolution)
-    val rasterizer = new Rasterizer(imgll, imgur, pixelResolution)
+    // computation options
+    
+    val imgCenter = Point2D(-0.10, 0)
+    val imgDims = DoublePair.of(3.2, 3.2/aspectRatio)
+    
+    val maxIterations = 5000
+    val maxCycle = 500
+    
+    val imgLowerLeft = Point2D(imgCenter.x - imgDims.x/2, imgCenter.y - imgDims.y/2)
+    val imgUpperRight= Point2D(imgCenter.x + imgDims.x/2, imgCenter.y + imgDims.y/2)
+    
+    val generator = new PointGenerator(imgLowerLeft, imgUpperRight, sampleResolution)
+    val rasterizer = new Rasterizer(imgLowerLeft, imgUpperRight, pixelResolution)
 
     val accumulator = new Accumulator(rasterizer)
+    
+    // misc options
+    
+    val reportIntervalMillis = 5000
 
-    new ProgressReporter(generator, 5000).start()
+    new ProgressReporter(generator, reportIntervalMillis).start()
 
     val millis = Timer.time {
-      generator.grouped(1000).flatMap { group => group.par.flatMap { startPoint =>
+      generator.flatMap { startPoint =>
 
         new CycleDetector(new MandelbrotIterator(startPoint, maxIterations), maxCycle)
 
-      }}.foreach(accumulator.accumulate(_))
+      }.foreach(accumulator.accumulate(_))
     }
     
     println("Rendering time: %.02f sec".format(millis.toDouble / 1000.0))
