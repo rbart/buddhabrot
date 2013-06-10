@@ -13,7 +13,7 @@ object BuddhabrotCLI {
 
     // image options
     
-    val imgWidth = 600
+    val imgWidth = 800
     val aspectRatio = 4.0 / 3.0
     val oversample = 8
     val imgHeight = (imgWidth / aspectRatio).toInt
@@ -22,11 +22,11 @@ object BuddhabrotCLI {
     
     // computation options
     
-    val imgCenter = Point2D(-0.10, 0)
+    val imgCenter = Point2D(-0.20, 0)
     val imgDims = DoublePair.of(3.2, 3.2/aspectRatio)
     
-    val maxIterations = 5000
-    val maxCycle = 500
+    val maxIterations = 10000
+    val maxCycle = 1000
     
     val imgLowerLeft = Point2D(imgCenter.x - imgDims.x/2, imgCenter.y - imgDims.y/2)
     val imgUpperRight= Point2D(imgCenter.x + imgDims.x/2, imgCenter.y + imgDims.y/2)
