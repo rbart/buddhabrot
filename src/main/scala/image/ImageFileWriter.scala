@@ -6,11 +6,11 @@ import java.awt.Color
 
 object ImageFileWriter {
 
-  def writeToFile(filename: String, imgData: Array[Array[Double]], resolution: IntPair): Unit = {
+  def writeToFile(filename: String, fileext: String, imgData: Array[Array[Double]], resolution: IntPair): Unit = {
     
     val img = toBufferedImage(imgData, resolution)
     
-    javax.imageio.ImageIO.write(img, "bmp", new java.io.File(filename))
+    javax.imageio.ImageIO.write(img, fileext, new java.io.File(filename + "." + fileext))
   }
   
   def toBufferedImage(imgData: Array[Array[Double]], resolution: IntPair): BufferedImage = {

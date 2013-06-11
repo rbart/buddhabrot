@@ -15,4 +15,15 @@ class Accumulator(val rasterizer: Rasterizer) {
       }
     }
   }
+  
+  def addAll(other: Accumulator): Unit = {
+    
+    for (x <- 0 until other.pixelArray.length) {
+      for (y <- 0 until other.pixelArray(0).length) {
+        pixelArray(x)(y) += other.pixelArray(x)(y)
+      }
+    }
+    
+    
+  }
 }
