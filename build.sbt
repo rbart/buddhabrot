@@ -1,3 +1,7 @@
+import AssemblyKeys._
+
+assemblySettings
+
 name := "Buddhabrot rendering tools for Scala"
 
 version := "1.0.0"
