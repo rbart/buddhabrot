@@ -2,20 +2,27 @@ package main
 
 import scopt.OptionParser
 import java.io.File
-import compute._
-
+import compute.IntPair
+import compute.Point2D
+import compute.DoublePair
+import compute.iterate.CycleDetectingIterator
 import image.EqualMassRenderer
 import image.ImageFileWriter
+import compute.iterate.MandelbrotIterator
+import compute.PointGenerator
+import compute.Accumulator
+import compute.Rasterizer
+import scala.collection.JavaConversions._
 
 case class Config(
-  pixelWidth: Int = 600,
-  pixelHeight: Int = 400,
+  pixelWidth: Int = 800,
+  pixelHeight: Int = 450,
   oversample: Int = 4,
   imgCenterX: Double = -0.20,
   imgCenterY: Double = 0.0,
   imgWidth: Double = 5.0,
-  maxIterations: Int = 500,
-  maxCycle: Int = 20,
+  maxIterations: Int = 250,
+  maxCycle: Int = 250,
   filename: String = "./default_fractal",
   fileExt: String = "bmp") {
 
@@ -91,17 +98,34 @@ object BuddhabrotCLI {
     new ProgressReporter(generator, reportIntervalMillis).start()
 
     val millis = Timer.time {
-      generator.grouped(20000).grouped(100).foreach { bigGroup =>
+      
+      val filterHack = generator.filter(_.y < 0)
+      
+      filterHack.grouped(20000).grouped(100).foreach { bigGroup =>
 
         bigGroup.par.foreach { smallGroup =>
           smallGroup.foreach { startPoint =>
-            new CycleDetector(new MandelbrotIterator(startPoint, c.maxIterations), c.maxCycle).foreach { resultPoint =>
-              accumulator.accumulate(resultPoint)
+            
+            val baseMbrotIterator = new MandelbrotIterator(startPoint, c.maxIterations)
+            val cycleDetIterator = new CycleDetectingIterator(baseMbrotIterator, c.maxCycle)
+            
+            cycleDetIterator.takeWhile { _ => !cycleDetIterator.cycleFound } foreach {
+              point=>
+                accumulator.accumulate(point)
+                accumulator.accumulate(point.invertY)
             }
+            
+//            if (cycleDetIterator.cycleLength == 3) cycleDetIterator.pointSet foreach  { 
+//              point => 
+//                accumulator.accumulate(point) 
+//                accumulator.accumulate(point.invertY) 
+//              }
+            
           }
         }
 
-      }
+      } 
+      // End timer
     }
 
     println("Rendering time: %.02f sec".format(millis.toDouble / 1000.0))

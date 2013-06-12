@@ -17,4 +17,11 @@ object DoublePair {
   
 }
 
-case class Point2D(val x: Double, val y: Double) extends DoublePair
+case class Point2D(val x: Double, val y: Double) extends DoublePair {
+  override def toString: String = {
+    "(%.02f, %.02f)".format(x, y)
+  }
+  
+  def invertY: Point2D = Point2D(x, -y)
+  
+}
