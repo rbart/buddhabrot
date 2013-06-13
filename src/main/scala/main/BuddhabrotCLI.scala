@@ -124,8 +124,6 @@ object BuddhabrotCLI {
                 accumulator.accumulate(point)
                 accumulator.accumulate(point.invertY)
             }
-
-            cycleDetIterator.takeWhile { _ => !cycleDetIterator.cycleFound } foreach { _ => }
           }
         }
 
