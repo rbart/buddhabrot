@@ -1,7 +1,7 @@
 package compute.iterate
 
 import java.util.ArrayDeque
-import java.util.HashSet
+import java.util.HashMap
 import compute.Point2D
 import scala.collection.JavaConversions._
 
@@ -10,38 +10,43 @@ import scala.collection.JavaConversions._
  */
 class CycleDetectingIterator(val baseIterator: ComplexIterator, val maxCycle: Int) extends Iterator[Point2D] {
       
-  val pointQueue = new ArrayDeque[Point2D](maxCycle)
-  val pointSet = new HashSet[Point2D](maxCycle)
+  private var time: Long = 0
+ 
+  val pointToTime = new HashMap[Point2D, Long](maxCycle)
+  val timeToPoint = new HashMap[Long, Point2D](maxCycle)
   
   def cycleFound = cycleLength != -1
   var cycleLength: Int = -1
   
   def getCycle: Iterator[Point2D] = {
     if (!cycleFound) return Iterator.empty
-    pointQueue.take(cycleLength).iterator
+    (time to time - cycleLength + 1 by -1).iterator map timeToPoint.get
   }
   
   def hasNext = baseIterator.hasNext 
   
   def next: Point2D = {
     
+    time += 1
+    
     val next = baseIterator.next
     
     // now determine if we've seen this element before
-    pointQueue.addFirst(next)
-    pointSet.add(next)
+    val cycleExists = pointToTime.containsKey(next)
     
-    val cycleExists = pointQueue.size != pointSet.size
-    
-    if (cycleExists && !cycleFound) {
-      // the duplicate must be later down in the queue - find it's index,
-      // that is the length of the cycle.
-      cycleLength = pointQueue.iterator.drop(1).indexOf(next) + 1
+    if (cycleExists) {
+    	// if we have, then update cycleLength accordingly
+      val timeLastSeen = pointToTime.get(next)
+      cycleLength = (time - timeLastSeen).toInt + 1
     }
     
-    if (pointQueue.size > maxCycle) {
-      val oldPoint = pointQueue.removeLast()
-      if (!cycleExists) pointSet.remove(oldPoint)
+    pointToTime.put(next, time)
+    timeToPoint.put(time, next)
+    
+    val delTime = time - maxCycle
+    if (delTime >= 0) {
+      val deleted = timeToPoint.remove(delTime)
+      if (!next.equals(deleted)) pointToTime.remove(deleted)
     }
     
     next

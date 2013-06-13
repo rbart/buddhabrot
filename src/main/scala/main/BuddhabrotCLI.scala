@@ -15,15 +15,15 @@ import compute.Rasterizer
 import scala.collection.JavaConversions._
 
 case class Config(
-  pixelWidth: Int = 800,
-  pixelHeight: Int = 450,
+  pixelWidth: Int = 800 * 1,
+  pixelHeight: Int = 600 * 1,
   oversample: Int = 4,
   imgCenterX: Double = -0.20,
   imgCenterY: Double = 0.0,
   imgWidth: Double = 5.0,
-  maxIterations: Int = 250,
-  maxCycle: Int = 250,
-  filename: String = "./default_fractal",
+  maxIterations: Int = 2500,
+  maxCycle: Int = 100,
+  filename: String = "./default",
   fileExt: String = "bmp") {
 
   val aspectRatio = pixelWidth.toDouble / pixelHeight.toDouble
@@ -35,6 +35,16 @@ case class Config(
 
   val imgLowerLeft = Point2D(imgCenter.x - imgDims.x / 2, imgCenter.y - imgDims.y / 2)
   val imgUpperRight = Point2D(imgCenter.x + imgDims.x / 2, imgCenter.y + imgDims.y / 2)
+}
+
+object Primes {
+  // omit 2
+  val set = Set(2, 3, 5,  7,
+      11, 13 , 17 , 19 , 23 , 29 , 31 , 37 , 41 , 43 , 47 , 53 , 59 , 61 , 67, 71, 73 , 79 , 83 , 89 , 97 , 101 , 103 , 107 , 109 , 113 , 127 , 131 , 137 , 139 , 149 , 151 , 157 , 163,
+167 , 173 , 179 , 181 , 191 , 193 , 197 , 199 , 211 , 223 , 227 , 229 , 233 , 239 , 241 , 251 , 257 , 263 , 269,
+271 , 277 , 281 , 283 , 293 , 307 , 311 , 313 , 317 , 331 , 337 , 347 , 349 , 353 , 359 , 367 , 373 , 379 , 383,
+389 , 397 , 401 , 409 , 419 , 421 , 431 , 433 , 439 , 443 , 449 , 457 , 461 , 463 , 467 , 479 , 487 , 491 , 499)
+  
 }
 
 object BuddhabrotCLI {
@@ -105,22 +115,17 @@ object BuddhabrotCLI {
 
         bigGroup.par.foreach { smallGroup =>
           smallGroup.foreach { startPoint =>
-            
+
             val baseMbrotIterator = new MandelbrotIterator(startPoint, c.maxIterations)
             val cycleDetIterator = new CycleDetectingIterator(baseMbrotIterator, c.maxCycle)
-            
+
             cycleDetIterator.takeWhile { _ => !cycleDetIterator.cycleFound } foreach {
-              point=>
+              point =>
                 accumulator.accumulate(point)
                 accumulator.accumulate(point.invertY)
             }
-            
-//            if (cycleDetIterator.cycleLength == 3) cycleDetIterator.pointSet foreach  { 
-//              point => 
-//                accumulator.accumulate(point) 
-//                accumulator.accumulate(point.invertY) 
-//              }
-            
+
+            cycleDetIterator.takeWhile { _ => !cycleDetIterator.cycleFound } foreach { _ => }
           }
         }
 

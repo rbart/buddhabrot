@@ -23,5 +23,5 @@ case class Point2D(val x: Double, val y: Double) extends DoublePair {
   }
   
   def invertY: Point2D = Point2D(x, -y)
-  
+  def cTc = x*x+y*y
 }

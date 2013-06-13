@@ -4,8 +4,9 @@ class Accumulator(val rasterizer: Rasterizer) {
 
   val pixelArray = Array.ofDim[Long](rasterizer.resolution.x, rasterizer.resolution.y)
   
-  def accumulate(point: Point2D): Unit = {
-    
+  def accumulate(point: Point2D): Unit = accumulate(point, 1)
+  
+  def accumulate(point: Point2D, multiplier: Int): Unit = {
         
     val pixel = rasterizer.toPixelCoordinates(point)
     
@@ -13,11 +14,9 @@ class Accumulator(val rasterizer: Rasterizer) {
     if (pixel.x >= 0 && pixel.x < rasterizer.resolution.x) {
       if (pixel.y >= 0 && pixel.y < rasterizer.resolution.y) {
                 
-        pixelArray(pixel.x)(pixel.y) += 1
+        pixelArray(pixel.x)(pixel.y) += multiplier
       }
     }
-    
-    
   }
   
   def addAll(other: Accumulator): Unit = {

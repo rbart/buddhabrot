@@ -2,8 +2,9 @@ package compute
 
 class PointGenerator(val llExtent: Point2D, val urExtent: Point2D, val resolution: IntPair) extends Iterator[Point2D] {
 
-  var pointsGenerated = 0
-  def progressFraction = pointsGenerated.toDouble / (resolution.x * resolution.y).toDouble
+  var pointsGenerated: Long = 0
+  private val resolutionProduct = (resolution.x.toLong * resolution.y.toLong).toDouble
+  def progressFraction = pointsGenerated.toDouble / resolutionProduct
   
   // The x and y steps: units per pixel
   val xStep = (urExtent.x - llExtent.x) / (resolution.x - 1).toDouble;
