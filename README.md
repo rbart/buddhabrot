@@ -1,7 +1,7 @@
 buddhabrot
 ==========
 
-Tools for rendering (anti-) buddhabrot fractals
+Tools for rendering (anti-) [buddhabrot fractals](https://en.wikipedia.org/wiki/Buddhabrot).
 
 This can be rendered relatively quickly:
 
